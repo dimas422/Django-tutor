@@ -6,8 +6,9 @@ from django.views import generic
 from django.utils import timezone
 from .models import Choice, Question
 from django.views.decorators.csrf import csrf_exempt
-
-
+from django.http import JsonResponse
+from .models import Account
+import json
 
 class IndexView(generic.ListView):
     template_name = "polls/index.html"
@@ -77,3 +78,17 @@ def testview(request):
         return HttpResponse("Post request")
     else:
         return HttpResponse("Not post request")
+
+@csrf_exempt
+def login_view(request):
+    if request.method == "POST":
+        data = json.loads(request.body)
+        login = data.get("login")
+        password = data.get("password")
+        q = Account(login = login, password=password)
+        q.save()
+        if q:
+            return JsonResponse({"status":"ok"})
+        else:
+            return JsonResponse({"status":"error"})
+    return JsonResponse({"message":"nice"})
